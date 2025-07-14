@@ -23,6 +23,7 @@ public class Task {
     private Long id;
     private String title;
     private String description;
+    private String priority;
     private Date dueDate;
     private TaskStatus taskStatus;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -36,10 +37,11 @@ public class Task {
         taskDTO.setId(id);
         taskDTO.setTitle(title);
         taskDTO.setDescription(description);
+        taskDTO.setPriority(priority);
         taskDTO.setDueDate(dueDate);
         taskDTO.setTaskStatus(taskStatus);
         taskDTO.setEmployeeId(user.getId());
-        taskDTO.setEmployeeName(user.getUsername());
+        taskDTO.setEmployeeName(user.getName());
         return taskDTO;
     }
 }

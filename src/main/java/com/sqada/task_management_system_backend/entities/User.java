@@ -78,6 +78,8 @@ public class User implements UserDetails {
         return email;
     }
 
+    public String getName(){ return username; };
+
     public void setEmail(String email) {
         this.email = email;
     }

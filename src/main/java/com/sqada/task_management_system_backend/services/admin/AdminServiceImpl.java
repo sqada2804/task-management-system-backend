@@ -1,21 +1,29 @@
 package com.sqada.task_management_system_backend.services.admin;
 
+import com.sqada.task_management_system_backend.dto.TaskDTO;
 import com.sqada.task_management_system_backend.dto.UserDTO;
+import com.sqada.task_management_system_backend.entities.Task;
 import com.sqada.task_management_system_backend.entities.User;
+import com.sqada.task_management_system_backend.enums.TaskStatus;
 import com.sqada.task_management_system_backend.enums.UserRole;
+import com.sqada.task_management_system_backend.repositories.TaskRepository;
 import com.sqada.task_management_system_backend.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class AdminServiceImpl implements IAdminService{
 
     private final UserRepository userRepository;
+    private final TaskRepository taskRepository;
 
-    public AdminServiceImpl(UserRepository userRepository) {
+    public AdminServiceImpl(UserRepository userRepository, TaskRepository taskRepository) {
         this.userRepository = userRepository;
+        this.taskRepository = taskRepository;
     }
 
     @Override
@@ -25,5 +33,37 @@ public class AdminServiceImpl implements IAdminService{
                 .filter(user -> user.getUserRole() == UserRole.EMPLOYEE)
                 .map(User::getUserDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public TaskDTO createTask(TaskDTO taskDTO) {
+        Optional<User> optUser = userRepository.findById(taskDTO.getEmployeeId());
+        if(optUser.isPresent()){
+            Task task = new Task();
+            task.setTaskStatus(TaskStatus.INPROGRESS);
+            task.setTitle(taskDTO.getTitle());
+            task.setDescription(taskDTO.getDescription());
+            task.setDueDate(taskDTO.getDueDate());
+            task.setPriority(taskDTO.getPriority());
+            task.setUser(optUser.get());
+            return taskRepository.save(task).getTaskDTO();
+        }
+        return null;
+    }
+
+    @Override
+    public List<TaskDTO> getAllTasks() {
+        return taskRepository.findAll()
+                .stream()
+                .sorted(Comparator.comparing(Task::getDueDate)
+                        .reversed())
+                .map(
+                Task::getTaskDTO
+        ).collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteTask(Long taskId) {
+        taskRepository.deleteById(taskId);
     }
 }
