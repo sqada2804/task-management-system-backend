@@ -12,4 +12,6 @@ public interface IAdminService {
     TaskDTO createTask(TaskDTO taskDTO);
     List<TaskDTO> getAllTasks();
     void deleteTask(Long taskId);
+    TaskDTO getTaskById(Long id);
+    TaskDTO updateTask(TaskDTO taskDTO, Long taskId);
 }

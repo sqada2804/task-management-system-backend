@@ -10,6 +10,7 @@ import com.sqada.task_management_system_backend.repositories.TaskRepository;
 import com.sqada.task_management_system_backend.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
+import javax.management.RuntimeErrorException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -65,5 +66,36 @@ public class AdminServiceImpl implements IAdminService{
     @Override
     public void deleteTask(Long taskId) {
         taskRepository.deleteById(taskId);
+    }
+
+    @Override
+    public TaskDTO getTaskById(Long taskId) {
+        Optional<Task> optTask = taskRepository.findById(taskId);
+        return optTask.map(Task::getTaskDTO).orElseThrow(() -> new RuntimeException("Can't get the task by id"));
+    }
+
+    @Override
+    public TaskDTO updateTask(TaskDTO taskDTO, Long taskId) {
+        Optional<Task> optTask = taskRepository.findById(taskId);
+        if(optTask.isPresent()){
+            Task existingTask = optTask.get();
+            existingTask.setTitle(taskDTO.getTitle());
+            existingTask.setDescription(taskDTO.getDescription());
+            existingTask.setDueDate(taskDTO.getDueDate());
+            existingTask.setPriority(taskDTO.getPriority());
+            existingTask.setTaskStatus(mapStringToTaskStatus(String.valueOf(taskDTO.getTaskStatus())));
+            return taskRepository.save(existingTask).getTaskDTO();
+        }
+        return null;
+    }
+
+    private TaskStatus mapStringToTaskStatus(String status){
+        return switch (status){
+            case "PENDING" -> TaskStatus.PENDING;
+            case "INPROGRESS" -> TaskStatus.INPROGRESS;
+            case "COMPLETED" -> TaskStatus.COMPLETED;
+            case "DEFERRED" -> TaskStatus.DEFERRED;
+            default -> TaskStatus.CANCELLED;
+        };
     }
 }
