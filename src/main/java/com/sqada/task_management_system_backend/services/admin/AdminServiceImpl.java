@@ -77,13 +77,15 @@ public class AdminServiceImpl implements IAdminService{
     @Override
     public TaskDTO updateTask(TaskDTO taskDTO, Long taskId) {
         Optional<Task> optTask = taskRepository.findById(taskId);
-        if(optTask.isPresent()){
+        Optional<User> optUser = userRepository.findById(taskDTO.getEmployeeId());
+        if(optTask.isPresent() && optUser.isPresent()){
             Task existingTask = optTask.get();
             existingTask.setTitle(taskDTO.getTitle());
             existingTask.setDescription(taskDTO.getDescription());
             existingTask.setDueDate(taskDTO.getDueDate());
             existingTask.setPriority(taskDTO.getPriority());
             existingTask.setTaskStatus(mapStringToTaskStatus(String.valueOf(taskDTO.getTaskStatus())));
+            existingTask.setUser(optUser.get());
             return taskRepository.save(existingTask).getTaskDTO();
         }
         return null;
